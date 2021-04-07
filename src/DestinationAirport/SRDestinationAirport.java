@@ -8,8 +8,8 @@ public class SRDestinationAirport implements 	IDestinationAirport_Hostess,
 		
 	}
 	
-	@Override
+	/*@Override
 	public void method() {
 		
-	}
+	}*/
 }
