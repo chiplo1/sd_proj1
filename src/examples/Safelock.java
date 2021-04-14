@@ -1,4 +1,4 @@
-package Main;
+package examples;
 
 /* Lock Objects
 Synchronized code relies on a simple kind of reentrant lock. This kind of lock is easy to use, but has many limitations. More sophisticated locking idioms are supported by the java.util.concurrent.locks package. We won't examine this package in detail, but instead will focus on its most basic interface, Lock.

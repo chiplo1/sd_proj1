@@ -13,25 +13,42 @@ FLYING_BACK – independent state with blocking -- SRplane
 	The pilot should be made to sleep for a random time interval in the simulation.
  */
 public class AEPilot extends Thread {
+	
+	private String curret_state;
+	private String last_state;
+	
 	public void run() {
+		setCurret_state("AT_TRANSFER_GATE");
+		last_state = getCurret_state();
         System.out.println("Hello from Pilot!");
+        for(;;) {
+        	String new_state = getCurret_state();
+        	if(new_state != last_state) {
+        		System.out.printf("Pilot new state: %s\n",new_state);
+        		last_state = new_state;
+        	}
+        }
     }
-	public void informPlaneReadyForBoarding() {
-		
+	
+	public String getCurret_state() {
+		return curret_state;
 	}
-	public void waitForAllInBoard() {
-		
+	public void setCurret_state(String curret_state) {
+		this.curret_state = curret_state;
 	}
-	public void flyToDestinationPoint() {
-		
-	}
-	public void announceArrival() {
-		
-	}
-	public void flyToDeparturePoint() {
-		
-	}
-	public void parkAtTransferGate() {
-		
-	}
+	/*	
+	curret_state = AT_TRANSFER_GATE;
+	public void informPlaneReadyForBoarding();
+	curret_state = READY_FOR_BOARDING;
+	public void waitForAllInBoard();
+	curret_state = WAIT_FOR_BOARDING;
+	public void flyToDestinationPoint();
+	curret_state = FLYING_FORWARD;
+	public void announceArrival();
+	curret_state = DEBOARDING;
+	public void flyToDeparturePoint();
+	curret_state = FLYING_BACK;
+	public void parkAtTransferGate();
+	curret_state = AT_TRANSFER_GATE;
+	*/
 }

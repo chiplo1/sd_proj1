@@ -1,6 +1,11 @@
 package Main;
 
 import ActiveEntity.*;
+
+import DepartureAirport.SRDepartureAirport;
+import DestinationAirport.SRDestinationAirport;
+import Plane.SRPlane;
+
 import genclass.*;
 
 public class AirLift {
@@ -23,7 +28,11 @@ public class AirLift {
 			aePassenger[i] = new AEPassenger();
 			aePassenger[i].start();
 		}
-		 
+		
+		SRDestinationAirport destinationAirport = new SRDestinationAirport(aePilot,aeHostess,aePassenger);
+		SRDepartureAirport departureAirport = new SRDepartureAirport(aePilot,aeHostess,aePassenger);
+		SRPlane plane = new SRPlane(aePilot,aeHostess,aePassenger);
+		
 		// wait active entities to die
 		try {
 			aePilot.join();

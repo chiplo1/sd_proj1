@@ -40,17 +40,16 @@ public class CFifo {
 		return value;
 	}
 	public void write(Integer value) {
-		// TO DO
 		try {
 			rl.lock();
 			while(count==0)
-				isEmpty.await();
-			value = fifo[idxRead];
-			idxRead = (idxRead++) % size;
-			count--;
+				notFull.await();
+			value = fifo[idxWrite];
+			idxWrite = (idxWrite++) % size;
+			count++;
 			
-			notFull.signal();
-			notFull.signalAll();
+			isEmpty.signal();
+			isEmpty.signalAll();
 		} catch(Exception ex) {}
 		finally {
 			rl.unlock();
