@@ -1,4 +1,9 @@
 package ActiveEntity;
+
+import DepartureAirport.SRDepartureAirport;
+import DestinationAirport.SRDestinationAirport;
+import Plane.SRPlane;
+
 /* Hostess
 WAIT_FOR_NEXT_FLIGHT – blocking state (initial / final state) -- SRdepAirport
 	The hostess is waken up by the operation informPlaneReadyForBoarding of the pilot after
@@ -13,28 +18,69 @@ READY_TO_FLY – transition state
 */
 public class AEHostess extends Thread {
 	
-	private String curret_state;
-	private String last_state;
+	/**
+     * Identifier of the Hostess.
+     */
+	private final int id;
+	
+	/**
+     * Current state of the Hostess.
+     */
+	private HostessState state;
+	
+	/**
+     * Instance of the DepartureAirport.
+     */
+    private final SRDepartureAirport depAirport;
+    
+    /**
+     * Instance of the DestinationAirport.
+     */
+    private final SRDestinationAirport destAirport;
+    
+    /**
+     * Instance of the Plane.
+     */
+    private final SRPlane plane;
+	
+	public AEHostess(int id, SRDepartureAirport depAirport, SRDestinationAirport destAirport, SRPlane plane) {
+		this.id = id;
+		this.depAirport = depAirport;
+		this.destAirport = destAirport;
+		this.plane = plane;
+	}
 	
 	public void run() {
-		setCurret_state("WAIT_FOR_NEXT_FLIGHT");
-		last_state = getCurret_state();
         System.out.println("Hello from Hostess!");
-        for(;;) {
-        	String new_state = getCurret_state();
-        	if(new_state != last_state) {
-        		System.out.printf("Hostess new state: %s\n",new_state);
-        		last_state = new_state;
-        	}
-        }
+        // CALL METHODS FROM SHARED REGIONS
     }
 	
-	public String getCurret_state() {
-		return curret_state;
+	/**
+     * Get the ID of the Hostess
+     * 
+     * @return ID of the Hostess
+     */
+    public int getID(){
+        return this.id;
+    }
+	
+    /**
+     * Get the Hostess state
+     * 
+     * @return String with Hostess state
+     */
+	public HostessState getCurret_state() {
+		return this.state;
 	}
-	public void setCurret_state(String curret_state) {
-		this.curret_state = curret_state;
+	
+	/**
+     * Set the Hostess state
+     * @param String new state of the Hostess
+     */
+	public void setCurret_state(HostessState state) {
+		this.state = state;
 	}
+	
 	/*
 	current_state = WAIT_FOR_NEXT_FLIGHT;
 	public void prepareForPassBoarding();

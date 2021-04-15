@@ -15,9 +15,13 @@ public class AirLift {
 		int MAX_PASSENGER = 21;
 		
 		GenericIO.writeString("Simulation started\n");
+		
+		SRDepartureAirport departureAirport = new SRDepartureAirport();
+		SRDestinationAirport destinationAirport = new SRDestinationAirport();
+		SRPlane plane = new SRPlane();
 		 
-		AEPilot aePilot = new AEPilot();
-		AEHostess aeHostess = new AEHostess();
+		AEPilot aePilot = new AEPilot(0,departureAirport,destinationAirport,plane);
+		AEHostess aeHostess = new AEHostess(0,departureAirport,destinationAirport,plane);
 		AEPassenger[] aePassenger = new AEPassenger[MAX_PASSENGER];
 		 
 		// start active entities: Threads
@@ -25,13 +29,11 @@ public class AirLift {
 		aeHostess.start();
 		 		 
 		for (Integer i = 0; i < MAX_PASSENGER;i++) {
-			aePassenger[i] = new AEPassenger();
+			aePassenger[i] = new AEPassenger(i,departureAirport,destinationAirport,plane);
 			aePassenger[i].start();
 		}
 		
-		SRDestinationAirport destinationAirport = new SRDestinationAirport(aePilot,aeHostess,aePassenger);
-		SRDepartureAirport departureAirport = new SRDepartureAirport(aePilot,aeHostess,aePassenger);
-		SRPlane plane = new SRPlane(aePilot,aeHostess,aePassenger);
+		
 		
 		// wait active entities to die
 		try {

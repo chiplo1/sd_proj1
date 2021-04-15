@@ -1,4 +1,9 @@
 package ActiveEntity;
+
+import DepartureAirport.SRDepartureAirport;
+import DestinationAirport.SRDestinationAirport;
+import Plane.SRPlane;
+
 /* Pilot
 AT_TRANSFER_GATE – transition state (initial / final state)
 READY_FOR_BOARDING – transition state
@@ -14,27 +19,67 @@ FLYING_BACK – independent state with blocking -- SRplane
  */
 public class AEPilot extends Thread {
 	
-	private String curret_state;
-	private String last_state;
+	/**
+     * Identifier of the Pilot.
+     */
+	private final int id;
+	
+	/**
+     * Current state of the Pilot.
+     */
+	private PilotState state;
+	
+	/**
+     * Instance of the DepartureAirport.
+     */
+    private final SRDepartureAirport depAirport;
+    
+    /**
+     * Instance of the DestinationAirport.
+     */
+    private final SRDestinationAirport destAirport;
+    
+    /**
+     * Instance of the Plane.
+     */
+    private final SRPlane plane;
+	
+	public AEPilot(int id, SRDepartureAirport depAirport, SRDestinationAirport destAirport, SRPlane plane) {
+		this.id = id;
+		this.depAirport = depAirport;
+		this.destAirport = destAirport;
+		this.plane = plane;
+	}
 	
 	public void run() {
-		setCurret_state("AT_TRANSFER_GATE");
-		last_state = getCurret_state();
         System.out.println("Hello from Pilot!");
-        for(;;) {
-        	String new_state = getCurret_state();
-        	if(new_state != last_state) {
-        		System.out.printf("Pilot new state: %s\n",new_state);
-        		last_state = new_state;
-        	}
-        }
+        // CALL METHODS FROM SHARED REGIONS
     }
 	
-	public String getCurret_state() {
-		return curret_state;
+	/**
+     * Get the ID of the Pilot
+     * 
+     * @return ID of the Pilot
+     */
+    public int getID(){
+        return this.id;
+    }
+	
+    /**
+     * Get the Pilot state
+     * 
+     * @return String with Pilot state
+     */
+	public PilotState getCurret_state() {
+		return this.state;
 	}
-	public void setCurret_state(String curret_state) {
-		this.curret_state = curret_state;
+	
+	/**
+     * Set the Pilot state
+     * @param String new state of the Pilot
+     */
+	public void setCurret_state(PilotState state) {
+		this.state = state;
 	}
 	/*	
 	curret_state = AT_TRANSFER_GATE;

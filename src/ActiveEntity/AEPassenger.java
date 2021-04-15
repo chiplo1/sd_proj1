@@ -1,4 +1,9 @@
 package ActiveEntity;
+
+import DepartureAirport.SRDepartureAirport;
+import DestinationAirport.SRDestinationAirport;
+import Plane.SRPlane;
+
 /* Passenger
 GOING_TO_AIRPORT – independent state with blocking (initial state) -- SRdepAirport
 	The passenger should be made to sleep for a random time interval in the simulation.
@@ -13,28 +18,69 @@ AT_DESTINATION – transition state (final state)
 */
 public class AEPassenger extends Thread {
 	
-	private String curret_state;
-	private String last_state;
+	/**
+     * Identifier of the Passenger.
+     */
+	private final int id;
+	
+	/**
+     * Current state of the Passenger.
+     */
+	private PassengerState state;
+	
+	/**
+     * Instance of the DepartureAirport.
+     */
+    private final SRDepartureAirport depAirport;
+    
+    /**
+     * Instance of the DestinationAirport.
+     */
+    private final SRDestinationAirport destAirport;
+    
+    /**
+     * Instance of the Plane.
+     */
+    private final SRPlane plane;
+	
+	public AEPassenger(int id, SRDepartureAirport depAirport, SRDestinationAirport destAirport, SRPlane plane) {
+		this.id = id;
+		this.depAirport = depAirport;
+		this.destAirport = destAirport;
+		this.plane = plane;
+	}
 	
 	public void run() {
-		setCurret_state("GOING_TO_AIRPORT");
-		last_state = getCurret_state();
         System.out.println("Hello from Passenger!");
-        for(;;) {
-        	String new_state = getCurret_state();
-        	if(new_state != last_state) {
-        		System.out.printf("Passenger new state: %s\n",new_state);
-        		last_state = new_state;
-        	}
-        }
+        // CALL METHODS FROM SHARED REGIONS
     }
 	
-	public String getCurret_state() {
-		return curret_state;
+	/**
+     * Get the ID of the Passenger
+     * 
+     * @return ID of the Passenger
+     */
+    public int getID(){
+        return this.id;
+    }
+	
+    /**
+     * Get the Passenger state
+     * 
+     * @return Passenger state
+     */
+	public PassengerState getCurret_state() {
+		return this.state;
 	}
-	public void setCurret_state(String curret_state) {
-		this.curret_state = curret_state;
+	
+	/**
+     * Set the Passenger state
+     * @param String new state of the Passenger
+     */
+	public void setCurret_state(PassengerState state) {
+		this.state = state;
 	}
+	
 	/*
 	public void travelToAirport();
 	current_state = GOING_TO_AIRPORT;
