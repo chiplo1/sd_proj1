@@ -52,7 +52,29 @@ public class AEHostess extends Thread {
 	
 	public void run() {
         System.out.println("Hello from Hostess!");
+    	/*
+    	current_state = WAIT_FOR_NEXT_FLIGHT;
+    	public void prepareForPassBoarding();
+    	while(passenger)
+    		current_state = WAIT_FOR_PASSENGER;
+    		public void checkDocuments();
+    		current_state = CHECK_PASSENGER;
+    		public void waitForNextPassenger();
+    	public void informPlaneReadyToTakeOff();
+    	current_state = READY_TO_FLY;
+    	public void waitForNextFlight();
+    	current_state = WAIT_FOR_NEXT_FLIGHT;
+    	*/
         // CALL METHODS FROM SHARED REGIONS
+        depAirport.prepareForPassBoarding();
+        
+        depAirport.checkDocuments();
+        
+        depAirport.waitForNextPassenger();
+        
+        depAirport.informPlaneReadyForBoarding();
+        
+        depAirport.waitForNextFlight();
     }
 	
 	/**
@@ -81,17 +103,4 @@ public class AEHostess extends Thread {
 		this.state = state;
 	}
 	
-	/*
-	current_state = WAIT_FOR_NEXT_FLIGHT;
-	public void prepareForPassBoarding();
-	while(passenger)
-		current_state = WAIT_FOR_PASSENGER;
-		public void checkDocuments();
-		current_state = CHECK_PASSENGER;
-		public void waitForNextPassenger();
-	public void informPlaneReadyToTakeOff();
-	current_state = READY_TO_FLY;
-	public void waitForNextFlight();
-	current_state = WAIT_FOR_NEXT_FLIGHT;
-	*/
 }

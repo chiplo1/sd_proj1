@@ -53,7 +53,33 @@ public class AEPilot extends Thread {
 	
 	public void run() {
         System.out.println("Hello from Pilot!");
+    	/*	
+    	curret_state = AT_TRANSFER_GATE;
+    	public void informPlaneReadyForBoarding();
+    	curret_state = READY_FOR_BOARDING;
+    	public void waitForAllInBoard();
+    	curret_state = WAIT_FOR_BOARDING;
+    	public void flyToDestinationPoint();
+    	curret_state = FLYING_FORWARD;
+    	public void announceArrival();
+    	curret_state = DEBOARDING;
+    	public void flyToDeparturePoint();
+    	curret_state = FLYING_BACK;
+    	public void parkAtTransferGate();
+    	curret_state = AT_TRANSFER_GATE;
+    	*/
         // CALL METHODS FROM SHARED REGIONS
+        depAirport.informPlaneReadyForBoarding();
+        
+        plane.waitForAllInBoard();
+        
+        plane.flyToDestinationPoint();
+        
+        plane.announceArrival();
+        
+        plane.flyToDeparturePoint();
+        
+        plane.parkAtTransferGate();
     }
 	
 	/**
@@ -81,19 +107,4 @@ public class AEPilot extends Thread {
 	public void setCurret_state(PilotState state) {
 		this.state = state;
 	}
-	/*	
-	curret_state = AT_TRANSFER_GATE;
-	public void informPlaneReadyForBoarding();
-	curret_state = READY_FOR_BOARDING;
-	public void waitForAllInBoard();
-	curret_state = WAIT_FOR_BOARDING;
-	public void flyToDestinationPoint();
-	curret_state = FLYING_FORWARD;
-	public void announceArrival();
-	curret_state = DEBOARDING;
-	public void flyToDeparturePoint();
-	curret_state = FLYING_BACK;
-	public void parkAtTransferGate();
-	curret_state = AT_TRANSFER_GATE;
-	*/
 }

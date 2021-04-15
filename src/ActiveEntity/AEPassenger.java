@@ -52,7 +52,31 @@ public class AEPassenger extends Thread {
 	
 	public void run() {
         System.out.println("Hello from Passenger!");
+    	/*
+    	public void travelToAirport();
+    	current_state = GOING_TO_AIRPORT;
+    	public void waitInQueue();
+    	current_state = IN_QUEUE;
+    	public void showDocuments();
+    	public void boardThePlane();
+    	current_state = IN_FLIGHT;
+    	public void waitForEndOfFlight();
+    	public void leaveThePlane();
+    	current_state = AT_DESTINATION;
+    	*/
         // CALL METHODS FROM SHARED REGIONS
+        
+        depAirport.travelToAirport();
+        
+        depAirport.waitInQueue();
+        
+        depAirport.showDocuments();
+        
+        plane.boardThePlane();
+        
+        plane.waitForEndOfFlight();
+        
+        plane.leaveThePlane();
     }
 	
 	/**
@@ -81,17 +105,5 @@ public class AEPassenger extends Thread {
 		this.state = state;
 	}
 	
-	/*
-	public void travelToAirport();
-	current_state = GOING_TO_AIRPORT;
-	public void waitInQueue();
-	current_state = IN_QUEUE;
-	public void showDocuments();
-	public void boardThePlane();
-	current_state = IN_FLIGHT;
-	public void waitForEndOfFlight();
-	public void leaveThePlane();
-	current_state = AT_DESTINATION;
-	*/
 }
 
