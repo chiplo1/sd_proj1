@@ -26,7 +26,7 @@ public class AEHostess extends Thread {
 	/**
      * Current state of the Hostess.
      */
-	private HostessState state;
+	private HostessState state = HostessState.WAIT_FOR_NEXT_FLIGHT;
 	
 	/**
      * Instance of the DepartureAirport.
@@ -49,32 +49,41 @@ public class AEHostess extends Thread {
 		this.destAirport = destAirport;
 		this.plane = plane;
 	}
-	
+
+	/**
+     * Function that implements Hostess life cycle
+     */
+	@Override
 	public void run() {
         System.out.println("Hello from Hostess!");
-    	/*
-    	current_state = WAIT_FOR_NEXT_FLIGHT;
-    	public void prepareForPassBoarding();
-    	while(passenger)
-    		current_state = WAIT_FOR_PASSENGER;
-    		public void checkDocuments();
-    		current_state = CHECK_PASSENGER;
-    		public void waitForNextPassenger();
-    	public void informPlaneReadyToTakeOff();
-    	current_state = READY_TO_FLY;
-    	public void waitForNextFlight();
-    	current_state = WAIT_FOR_NEXT_FLIGHT;
-    	*/
-        // CALL METHODS FROM SHARED REGIONS
-        depAirport.prepareForPassBoarding();
-        
-        depAirport.checkDocuments();
-        
-        depAirport.waitForNextPassenger();
-        
-        depAirport.informPlaneReadyForBoarding();
-        
-        depAirport.waitForNextFlight();
+
+    	while(true){
+            switch(this.state){
+                case WAIT_FOR_NEXT_FLIGHT:
+                	depAirport.prepareForPassBoarding();
+                    this.state = HostessState.WAIT_FOR_PASSENGER;
+                    break;
+                case WAIT_FOR_PASSENGER:
+                	depAirport.checkDocuments();
+                	this.state = HostessState.CHECK_PASSENGER;
+                    break;
+                case CHECK_PASSENGER:
+                	boolean morePassengers = depAirport.waitForNextPassenger();
+                	if(morePassengers) {
+                		this.state = HostessState.WAIT_FOR_PASSENGER;
+                	}
+                	else {
+                		depAirport.informPlaneReadyForBoarding();
+                		this.state = HostessState.WAIT_FOR_PASSENGER;
+                	}
+                	this.state = HostessState.READY_TO_FLY;
+                    break;
+                case READY_TO_FLY:
+                	depAirport.waitForNextFlight();
+                	this.state = HostessState.WAIT_FOR_NEXT_FLIGHT;
+                    break;
+            }
+        }
     }
 	
 	/**

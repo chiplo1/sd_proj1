@@ -27,7 +27,7 @@ public class AEPilot extends Thread {
 	/**
      * Current state of the Pilot.
      */
-	private PilotState state;
+	private PilotState state = PilotState.AT_TRANSFER_GATE;
 	
 	/**
      * Instance of the DepartureAirport.
@@ -51,35 +51,40 @@ public class AEPilot extends Thread {
 		this.plane = plane;
 	}
 	
+	/**
+     * Function that implements Pilot life cycle
+     */
+	@Override
 	public void run() {
         System.out.println("Hello from Pilot!");
-    	/*	
-    	curret_state = AT_TRANSFER_GATE;
-    	public void informPlaneReadyForBoarding();
-    	curret_state = READY_FOR_BOARDING;
-    	public void waitForAllInBoard();
-    	curret_state = WAIT_FOR_BOARDING;
-    	public void flyToDestinationPoint();
-    	curret_state = FLYING_FORWARD;
-    	public void announceArrival();
-    	curret_state = DEBOARDING;
-    	public void flyToDeparturePoint();
-    	curret_state = FLYING_BACK;
-    	public void parkAtTransferGate();
-    	curret_state = AT_TRANSFER_GATE;
-    	*/
-        // CALL METHODS FROM SHARED REGIONS
-        depAirport.informPlaneReadyForBoarding();
-        
-        plane.waitForAllInBoard();
-        
-        plane.flyToDestinationPoint();
-        
-        plane.announceArrival();
-        
-        plane.flyToDeparturePoint();
-        
-        plane.parkAtTransferGate();
+    	while(true){
+            switch(this.state){
+                case AT_TRANSFER_GATE:
+                	depAirport.informPlaneReadyForBoarding();
+                    this.state = PilotState.READY_FOR_BOARDING;
+                    break;
+                case READY_FOR_BOARDING:
+                	plane.waitForAllInBoard();
+                	this.state = PilotState.WAIT_FOR_BOARDING;
+                    break;
+                case WAIT_FOR_BOARDING:
+                	plane.flyToDestinationPoint();
+                	this.state = PilotState.FLYING_FORWARD;
+                    break;
+                case FLYING_FORWARD:
+                	plane.announceArrival();
+                	this.state = PilotState.DEBOARDING;
+                    break;
+                case DEBOARDING:
+                	plane.flyToDeparturePoint();
+                	this.state = PilotState.FLYING_BACK;
+                    break;
+                case FLYING_BACK:
+                	plane.parkAtTransferGate();
+                	this.state = PilotState.AT_TRANSFER_GATE;
+                    break;
+            }
+        }
     }
 	
 	/**

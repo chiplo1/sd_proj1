@@ -10,15 +10,17 @@ import genclass.*;
 
 public class AirLift {
 
-	private static void startSimulation() {
+	private static void startSimulation(int maxPassengers) {
 		 
-		int MAX_PASSENGER = 21;
+		final int MAX_PASSENGER = maxPassengers;
 		
 		GenericIO.writeString("Simulation started\n");
 		
-		SRDepartureAirport departureAirport = new SRDepartureAirport();
-		SRDestinationAirport destinationAirport = new SRDestinationAirport();
-		SRPlane plane = new SRPlane();
+		GeneralRepositoryInformation airport = new GeneralRepositoryInformation();
+		
+		SRDepartureAirport departureAirport = new SRDepartureAirport(airport);
+		SRDestinationAirport destinationAirport = new SRDestinationAirport(airport);
+		SRPlane plane = new SRPlane(airport,MAX_PASSENGER);
 		 
 		AEPilot aePilot = new AEPilot(0,departureAirport,destinationAirport,plane);
 		AEHostess aeHostess = new AEHostess(0,departureAirport,destinationAirport,plane);
@@ -49,14 +51,20 @@ public class AirLift {
 		 
 	}
 	public static void main(String[] args) {
-		
-		// 1 piloto, 1 hospedeira e 21 passageiros -- diferentes threads
-		// 3 classes: departure airport, destination airport, plane
-		// 1 ficheiro: general repository of information (historico das alterações nas classes partilhadas) - mais 1 class
-		// criar 1 e 1 só instância de cada classe
-		// uma thread tem como argumento as classes que necessita
 
-		startSimulation();
+		int numPassengers;
+		
+		if(args.length == 1){
+	           try{
+	               numPassengers= Integer.parseInt(args[0]);
+	           }catch(Exception e){   
+	        	   numPassengers = 21;
+	            }
+	       }else{
+	    	   numPassengers = 21;
+	       }
+
+		startSimulation(numPassengers);
 	}
 
 }

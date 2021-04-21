@@ -26,7 +26,7 @@ public class AEPassenger extends Thread {
 	/**
      * Current state of the Passenger.
      */
-	private PassengerState state;
+	private PassengerState state = PassengerState.GOING_TO_AIRPORT;
 	
 	/**
      * Instance of the DepartureAirport.
@@ -42,41 +42,42 @@ public class AEPassenger extends Thread {
      * Instance of the Plane.
      */
     private final SRPlane plane;
-	
+    	
 	public AEPassenger(int id, SRDepartureAirport depAirport, SRDestinationAirport destAirport, SRPlane plane) {
 		this.id = id;
 		this.depAirport = depAirport;
 		this.destAirport = destAirport;
 		this.plane = plane;
 	}
-	
+		
+	/**
+     * Function that implements Passenger life cycle
+     */
+	@Override
 	public void run() {
         System.out.println("Hello from Passenger!");
-    	/*
-    	public void travelToAirport();
-    	current_state = GOING_TO_AIRPORT;
-    	public void waitInQueue();
-    	current_state = IN_QUEUE;
-    	public void showDocuments();
-    	public void boardThePlane();
-    	current_state = IN_FLIGHT;
-    	public void waitForEndOfFlight();
-    	public void leaveThePlane();
-    	current_state = AT_DESTINATION;
-    	*/
-        // CALL METHODS FROM SHARED REGIONS
-        
-        depAirport.travelToAirport();
-        
-        depAirport.waitInQueue();
-        
-        depAirport.showDocuments();
-        
-        plane.boardThePlane();
-        
-        plane.waitForEndOfFlight();
-        
-        plane.leaveThePlane();
+
+    	while(true){
+            switch(this.state){
+                case GOING_TO_AIRPORT:
+                	depAirport.travelToAirport();
+                    this.state = PassengerState.IN_QUEUE;
+                    break;
+                case IN_QUEUE:
+                	depAirport.waitInQueue();
+                	depAirport.showDocuments();
+                	plane.boardThePlane();
+                	this.state = PassengerState.IN_FLIGHT;
+                    break;
+                case IN_FLIGHT:
+                	plane.waitForEndOfFlight();
+                	this.state = PassengerState.AT_DESTINATION;
+                    break;
+                case AT_DESTINATION:
+                	plane.leaveThePlane();
+                    break;
+            }
+        }
     }
 	
 	/**
