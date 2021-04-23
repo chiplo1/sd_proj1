@@ -7,30 +7,35 @@ import DestinationAirport.SRDestinationAirport;
 import Plane.SRPlane;
 
 import genclass.*;
+import utils.CFifo;
 
 public class AirLift {
 
-	private static void startSimulation(int maxPassengers) {
+	private static void startSimulation(int totalPassengers) {
 		 
-		final int MAX_PASSENGER = maxPassengers;
+		final int TOTAL_PASSENGERS = totalPassengers;
+		final int MAX_PASSENGERS = 10;
+		final int MIN_PASSENGERS = 5;
+		
+		CFifo fifo = new CFifo(totalPassengers);
 		
 		GenericIO.writeString("Simulation started\n");
 		
 		GeneralRepositoryInformation airport = new GeneralRepositoryInformation();
 		
 		SRDepartureAirport departureAirport = new SRDepartureAirport(airport);
-		SRDestinationAirport destinationAirport = new SRDestinationAirport(airport);
-		SRPlane plane = new SRPlane(airport,MAX_PASSENGER);
+		SRDestinationAirport destinationAirport = new SRDestinationAirport(airport,TOTAL_PASSENGERS);
+		SRPlane plane = new SRPlane(airport,MIN_PASSENGERS,MAX_PASSENGERS);
 		 
 		AEPilot aePilot = new AEPilot(0,departureAirport,destinationAirport,plane);
 		AEHostess aeHostess = new AEHostess(0,departureAirport,destinationAirport,plane);
-		AEPassenger[] aePassenger = new AEPassenger[MAX_PASSENGER];
+		AEPassenger[] aePassenger = new AEPassenger[TOTAL_PASSENGERS];
 		 
 		// start active entities: Threads
 		aePilot.start();
 		aeHostess.start();
 		 		 
-		for (Integer i = 0; i < MAX_PASSENGER;i++) {
+		for (Integer i = 0; i < TOTAL_PASSENGERS;i++) {
 			aePassenger[i] = new AEPassenger(i,departureAirport,destinationAirport,plane);
 			aePassenger[i].start();
 		}
@@ -41,7 +46,7 @@ public class AirLift {
 		try {
 			aePilot.join();
 			aeHostess.join();
-			for (Integer i = 0; i < MAX_PASSENGER;i++)
+			for (Integer i = 0; i < TOTAL_PASSENGERS;i++)
 				aePassenger[i].join();
 		 } catch ( Exception ex ) {
 			 // code

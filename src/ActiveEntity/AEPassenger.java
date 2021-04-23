@@ -4,18 +4,6 @@ import DepartureAirport.SRDepartureAirport;
 import DestinationAirport.SRDestinationAirport;
 import Plane.SRPlane;
 
-/* Passenger
-GOING_TO_AIRPORT – independent state with blocking (initial state) -- SRdepAirport
-	The passenger should be made to sleep for a random time interval in the simulation.
-IN_QUEUE – double blocking state -- SRdepAirport
-	The passenger is waken up first by the operation checkDocuments of the hostess requesting him/ her
-	to present the plane ticket and is waken up next by the operation waitForNextPassenger of the
-	hostess after the checking is being made.
-IN_FLIGHT – blocking state --SRplane
-	The passenger is waken up by the operation announceArrival of the pilot after parking the plane at
-	the arrival gate.
-AT_DESTINATION – transition state (final state)
-*/
 public class AEPassenger extends Thread {
 	
 	/**
@@ -59,17 +47,23 @@ public class AEPassenger extends Thread {
 
     	while(true){
             switch(this.state){
-                case GOING_TO_AIRPORT:
-                	depAirport.travelToAirport();
+                case GOING_TO_AIRPORT://independent state with blocking (initial state)
+                	//The passenger should be made to sleep for a random time interval in the simulation.
+                	depAirport.travelToAirport(this.id);
                     this.state = PassengerState.IN_QUEUE;
                     break;
-                case IN_QUEUE:
+                case IN_QUEUE://double blocking state
+                	//The passenger is waken up first by the operation checkDocuments of the hostess requesting him/ her
+                	//to present the plane ticket and is waken up next by the operation waitForNextPassenger of the
+                	//hostess after the checking is being made.
                 	depAirport.waitInQueue();
                 	depAirport.showDocuments();
-                	plane.boardThePlane();
+                	plane.boardThePlane(this.id);
                 	this.state = PassengerState.IN_FLIGHT;
                     break;
-                case IN_FLIGHT:
+                case IN_FLIGHT://blocking state
+                	//The passenger is waken up by the operation announceArrival of the pilot after parking the plane at
+                	//the arrival gate.
                 	plane.waitForEndOfFlight();
                 	this.state = PassengerState.AT_DESTINATION;
                     break;

@@ -5,16 +5,20 @@ import Main.GeneralRepositoryInformation;
 public class SRPlane implements IPlane_Hostess,
 								IPlane_Passenger,
 								IPlane_Pilot {
-	private final int MIN = 1;
+	private final int MIN;
 	private final int MAX;
 	private final GeneralRepositoryInformation airport;
 	
-	public SRPlane(GeneralRepositoryInformation airport, int maxPassengers) {
+	public SRPlane(GeneralRepositoryInformation airport, int minPassengers, int maxPassengers) {
         this.airport = airport;
         this.MAX = maxPassengers;
+        this.MIN = minPassengers;
     }
 	
 	//Pilot
+	public void informPlaneReadyForBoarding() {
+		System.out.println("informPlaneReadyForBoarding");
+	}
 	public void waitForAllInBoard() {
 		System.out.println("waitForAllInBoard");
 	}
@@ -30,12 +34,9 @@ public class SRPlane implements IPlane_Hostess,
 	public void parkAtTransferGate() {
 		System.out.println("parkAtTransferGate");
 	}
-	//Hostess
-	public void informPlaneReadyToTakeOff() {
-		System.out.println("informPlaneReadyToTakeOff");
-	}
+
 	//Passenger
-	public void boardThePlane() {
+	public void boardThePlane(int passengerID) {
 		System.out.println("boardThePlane");
 	}
 	public void waitForEndOfFlight() {
@@ -44,4 +45,5 @@ public class SRPlane implements IPlane_Hostess,
 	public void leaveThePlane() {
 		System.out.println("leaveThePlane");
 	}
+
 }

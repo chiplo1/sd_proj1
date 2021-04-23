@@ -1,4 +1,5 @@
-package Main;
+package utils;
+import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -28,7 +29,7 @@ public class CFifo {
 			while(count==0)
 				isEmpty.await();
 			value = fifo[idxRead];
-			idxRead = (idxRead++) % size;
+			idxRead = (idxRead+1) % size;
 			count--;
 			
 			notFull.signal();
@@ -42,10 +43,10 @@ public class CFifo {
 	public void write(Integer value) {
 		try {
 			rl.lock();
-			while(count==0)
+			while(count==size)
 				notFull.await();
-			value = fifo[idxWrite];
-			idxWrite = (idxWrite++) % size;
+			fifo[idxWrite] = value;
+			idxWrite = (idxWrite+1) % size;
 			count++;
 			
 			isEmpty.signal();
@@ -54,5 +55,8 @@ public class CFifo {
 		finally {
 			rl.unlock();
 		}
+	}
+	public String toString() {
+		return Arrays.toString(fifo);
 	}
 }

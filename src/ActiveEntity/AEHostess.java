@@ -56,31 +56,37 @@ public class AEHostess extends Thread {
 	@Override
 	public void run() {
         System.out.println("Hello from Hostess!");
-
-    	while(true){
+        boolean morePassengers=true;
+    	while(morePassengers){
             switch(this.state){
-                case WAIT_FOR_NEXT_FLIGHT:
+                case WAIT_FOR_NEXT_FLIGHT://blocking state (initial / final state)
+                	//The hostess is waken up by the operation informPlaneReadyForBoarding of the pilot after
+                	//parking the plane at the departure gate.
                 	depAirport.prepareForPassBoarding();
                     this.state = HostessState.WAIT_FOR_PASSENGER;
                     break;
-                case WAIT_FOR_PASSENGER:
+                case WAIT_FOR_PASSENGER://blocking state
+                	//The hostess is waken up by the operation waitInQueue of the passenger while he / she waits
+                	//to have his / her documents checked.
                 	depAirport.checkDocuments();
                 	this.state = HostessState.CHECK_PASSENGER;
                     break;
-                case CHECK_PASSENGER:
-                	boolean morePassengers = depAirport.waitForNextPassenger();
-                	if(morePassengers) {
+                case CHECK_PASSENGER://blocking state
+                	//The hostess is waken up by the operation showDocuments of the passenger when he / she
+                	//hands his / her plane ticket to be checked.
+                	boolean waitMore = depAirport.waitForNextPassenger();
+                	if(waitMore) {
                 		this.state = HostessState.WAIT_FOR_PASSENGER;
                 	}
                 	else {
-                		depAirport.informPlaneReadyForBoarding();
-                		this.state = HostessState.WAIT_FOR_PASSENGER;
+                		this.state = HostessState.READY_TO_FLY;
                 	}
-                	this.state = HostessState.READY_TO_FLY;
                     break;
                 case READY_TO_FLY:
+            		depAirport.informPlaneReadyToTakeOff();
                 	depAirport.waitForNextFlight();
                 	this.state = HostessState.WAIT_FOR_NEXT_FLIGHT;
+                	morePassengers = destAirport.morePassengers();
                     break;
             }
         }
