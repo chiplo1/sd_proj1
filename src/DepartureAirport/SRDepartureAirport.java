@@ -1,11 +1,11 @@
 package DepartureAirport;
 
-import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import Main.GeneralRepositoryInformation;
+import utils.BlockingQueue;
 
 public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 											IDepartureAirport_Passenger,
@@ -16,12 +16,12 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
     private final Condition documents = DepAirportLock.newCondition();
     
     private final GeneralRepositoryInformation airport;
-    private final LinkedList<Integer> queue = new LinkedList<>();
+    private final BlockingQueue<Integer> queue;
     private final int nInPlane;
 	
-	public SRDepartureAirport(GeneralRepositoryInformation airport) {
+	public SRDepartureAirport(GeneralRepositoryInformation airport, BlockingQueue<Integer> queue) {
         this.airport = airport;
-        this.queue.clear();
+        this.queue = queue;
         this.nInPlane = 0;
     }
 
@@ -74,10 +74,12 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		System.out.println("travelToAirport");
 		try {
 			TimeUnit.SECONDS.sleep((long) Math.random());
+			queue.put(id);
 		} catch (InterruptedException e) {
-			queue.add(id);
 		}
-		DepAirportLock.unlock();
+		finally {
+			DepAirportLock.unlock();
+		}
 	}
 	public void waitInQueue() {
 		System.out.println("waitInQueue");

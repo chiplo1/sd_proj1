@@ -49,7 +49,7 @@ public class AEPassenger extends Thread {
             switch(this.state){
                 case GOING_TO_AIRPORT://independent state with blocking (initial state)
                 	//The passenger should be made to sleep for a random time interval in the simulation.
-                	depAirport.travelToAirport(this.id);
+                	depAirport.travelToAirport(id);
                     this.state = PassengerState.IN_QUEUE;
                     break;
                 case IN_QUEUE://double blocking state
@@ -58,7 +58,7 @@ public class AEPassenger extends Thread {
                 	//hostess after the checking is being made.
                 	depAirport.waitInQueue();
                 	depAirport.showDocuments();
-                	plane.boardThePlane(this.id);
+                	plane.boardThePlane(id);
                 	this.state = PassengerState.IN_FLIGHT;
                     break;
                 case IN_FLIGHT://blocking state
@@ -69,6 +69,7 @@ public class AEPassenger extends Thread {
                     break;
                 case AT_DESTINATION:
                 	plane.leaveThePlane();
+                	destAirport.arrivedAtDestinationAirport(id);
                     break;
             }
         }

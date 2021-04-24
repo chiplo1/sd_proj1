@@ -1,5 +1,6 @@
 package Main;
 
+
 import ActiveEntity.*;
 
 import DepartureAirport.SRDepartureAirport;
@@ -7,7 +8,7 @@ import DestinationAirport.SRDestinationAirport;
 import Plane.SRPlane;
 
 import genclass.*;
-import utils.CFifo;
+import utils.BlockingQueue;
 
 public class AirLift {
 
@@ -17,13 +18,13 @@ public class AirLift {
 		final int MAX_PASSENGERS = 10;
 		final int MIN_PASSENGERS = 5;
 		
-		CFifo fifo = new CFifo(totalPassengers);
+		BlockingQueue<Integer> queue = new BlockingQueue<>(totalPassengers);
 		
 		GenericIO.writeString("Simulation started\n");
 		
 		GeneralRepositoryInformation airport = new GeneralRepositoryInformation();
 		
-		SRDepartureAirport departureAirport = new SRDepartureAirport(airport);
+		SRDepartureAirport departureAirport = new SRDepartureAirport(airport, queue);
 		SRDestinationAirport destinationAirport = new SRDestinationAirport(airport,TOTAL_PASSENGERS);
 		SRPlane plane = new SRPlane(airport,MIN_PASSENGERS,MAX_PASSENGERS);
 		 
