@@ -43,20 +43,20 @@ public class AEPassenger extends Thread {
      */
 	@Override
 	public void run() {
-        System.out.println("Hello from Passenger!");
+        System.out.printf("Passenger[%d]: Hello!\n", id);
 
     	while(true){
             switch(this.state){
                 case GOING_TO_AIRPORT://independent state with blocking (initial state)
                 	//The passenger should be made to sleep for a random time interval in the simulation.
-                	depAirport.travelToAirport(id);
+                	depAirport.travelToAirport();
                     this.state = PassengerState.IN_QUEUE;
                     break;
                 case IN_QUEUE://double blocking state
                 	//The passenger is waken up first by the operation checkDocuments of the hostess requesting him/ her
                 	//to present the plane ticket and is waken up next by the operation waitForNextPassenger of the
                 	//hostess after the checking is being made.
-                	depAirport.waitInQueue();
+                	depAirport.waitInQueue(id);
                 	depAirport.showDocuments();
                 	plane.boardThePlane(id);
                 	this.state = PassengerState.IN_FLIGHT;
@@ -68,8 +68,7 @@ public class AEPassenger extends Thread {
                 	this.state = PassengerState.AT_DESTINATION;
                     break;
                 case AT_DESTINATION:
-                	plane.leaveThePlane();
-                	destAirport.arrivedAtDestinationAirport(id);
+                	destAirport.leaveThePlane(id);
                     break;
             }
         }

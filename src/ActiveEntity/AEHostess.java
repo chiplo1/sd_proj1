@@ -43,13 +43,14 @@ public class AEHostess extends Thread {
      */
 	@Override
 	public void run() {
-        System.out.println("Hello from Hostess!");
+        System.out.println("Hostess: Hello!");
         boolean morePassengers=true;
     	while(morePassengers){
             switch(this.state){
                 case WAIT_FOR_NEXT_FLIGHT://blocking state (initial / final state)
                 	//The hostess is waken up by the operation informPlaneReadyForBoarding of the pilot after
                 	//parking the plane at the departure gate.
+                	depAirport.waitForNextFlight();
                 	depAirport.prepareForPassBoarding();
                     this.state = HostessState.WAIT_FOR_PASSENGER;
                     break;
@@ -72,7 +73,6 @@ public class AEHostess extends Thread {
                     break;
                 case READY_TO_FLY:
             		depAirport.informPlaneReadyToTakeOff();
-                	depAirport.waitForNextFlight();
                 	this.state = HostessState.WAIT_FOR_NEXT_FLIGHT;
                 	morePassengers = destAirport.morePassengers();
                     break;

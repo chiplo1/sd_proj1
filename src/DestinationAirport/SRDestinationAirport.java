@@ -1,5 +1,7 @@
 package DestinationAirport;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import Main.GeneralRepositoryInformation;
 
 public class SRDestinationAirport implements 	IDestinationAirport_Hostess,
@@ -11,6 +13,8 @@ public class SRDestinationAirport implements 	IDestinationAirport_Hostess,
 	private int arrivedPassengers[];
 	private int countArrived;
 	
+	private final ReentrantLock DepAirportLock = new ReentrantLock(true);
+	
 	public SRDestinationAirport(GeneralRepositoryInformation airport, int totalPassengers) {
         this.airport = airport;
         this.totalPassengers = totalPassengers;
@@ -18,15 +22,25 @@ public class SRDestinationAirport implements 	IDestinationAirport_Hostess,
         countArrived = 0;
     }
 	
-	public boolean morePassengers() {
-		if(countArrived==totalPassengers)
-			return false;
-		else
-			return true;
+	//Passenger
+	public void leaveThePlane(int id) {
+		DepAirportLock.lock();
+		System.out.println("Passenger: leaveThePlane");
+		arrivedPassengers[countArrived++] = id;
+		System.out.printf("Passengers at destination: %d\n", countArrived);
+		DepAirportLock.unlock();
 	}
 	
-	public void arrivedAtDestinationAirport(int id) {
-		arrivedPassengers[countArrived++] = id;
+	//Other
+	public boolean morePassengers() {
+		DepAirportLock.lock();
+		if(countArrived==totalPassengers) {
+			DepAirportLock.unlock();
+			return false;
+		}	
+		else {
+			DepAirportLock.unlock();
+			return true;
+		}	
 	}
-
 }

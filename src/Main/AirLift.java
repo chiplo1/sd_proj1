@@ -8,7 +8,6 @@ import DestinationAirport.SRDestinationAirport;
 import Plane.SRPlane;
 
 import genclass.*;
-import utils.BlockingQueue;
 
 public class AirLift {
 
@@ -17,16 +16,14 @@ public class AirLift {
 		final int TOTAL_PASSENGERS = totalPassengers;
 		final int MAX_PASSENGERS = 10;
 		final int MIN_PASSENGERS = 5;
-		
-		BlockingQueue<Integer> queue = new BlockingQueue<>(totalPassengers);
-		
+				
 		GenericIO.writeString("Simulation started\n");
 		
 		GeneralRepositoryInformation airport = new GeneralRepositoryInformation();
 		
-		SRDepartureAirport departureAirport = new SRDepartureAirport(airport, queue);
+		SRDepartureAirport departureAirport = new SRDepartureAirport(airport, TOTAL_PASSENGERS, MIN_PASSENGERS, MAX_PASSENGERS);
 		SRDestinationAirport destinationAirport = new SRDestinationAirport(airport,TOTAL_PASSENGERS);
-		SRPlane plane = new SRPlane(airport,MIN_PASSENGERS,MAX_PASSENGERS);
+		SRPlane plane = new SRPlane(airport);
 		 
 		AEPilot aePilot = new AEPilot(0,departureAirport,destinationAirport,plane);
 		AEHostess aeHostess = new AEHostess(0,departureAirport,destinationAirport,plane);

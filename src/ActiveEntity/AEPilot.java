@@ -43,16 +43,16 @@ public class AEPilot extends Thread {
      */
 	@Override
 	public void run() {
-        System.out.println("Hello from Pilot!");
+        System.out.println("Pilot: Hello!");
         boolean morePassengers=true;
     	while(morePassengers){
             switch(this.state){
                 case AT_TRANSFER_GATE:
-                	plane.informPlaneReadyForBoarding();
+                	depAirport.informPlaneReadyForBoarding();
                     this.state = PilotState.READY_FOR_BOARDING;
                     break;
                 case READY_FOR_BOARDING:
-                	plane.waitForAllInBoard();
+                	depAirport.waitForAllInBoard();
                 	this.state = PilotState.WAIT_FOR_BOARDING;
                     break;
                 case WAIT_FOR_BOARDING://blocking state - The pilot is waken up by the operation informPlaneReadyToTakeOff of the hostess when boarding is complete.

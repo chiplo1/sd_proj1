@@ -12,44 +12,93 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 											IDepartureAirport_Pilot{
 	
 	private final ReentrantLock DepAirportLock = new ReentrantLock(true);
-    private final Condition planeReady = DepAirportLock.newCondition();
+    private final Condition readyForBoarding = DepAirportLock.newCondition();
+    private final Condition readyToFly = DepAirportLock.newCondition();
     private final Condition documents = DepAirportLock.newCondition();
+    private final Condition showDocuments = DepAirportLock.newCondition();
+    private final Condition inqueue = DepAirportLock.newCondition();
     
     private final GeneralRepositoryInformation airport;
-    private final BlockingQueue<Integer> queue;
-    private final int nInPlane;
+	private final BlockingQueue<Integer> queue;
+    private int nInPlane;
+	private final int MIN;
+	private final int MAX;
+	private int totalLeft;
 	
-	public SRDepartureAirport(GeneralRepositoryInformation airport, BlockingQueue<Integer> queue) {
+	public SRDepartureAirport(GeneralRepositoryInformation airport, int totalPassengers, int minPassengers, int maxPassengers) {
         this.airport = airport;
-        this.queue = queue;
+        this.queue= new BlockingQueue<>(totalPassengers);
         this.nInPlane = 0;
+        this.MAX = maxPassengers;
+        this.MIN = minPassengers;
+        this.totalLeft = totalPassengers;
     }
-
-	//Hostess
-	public void prepareForPassBoarding() {
+	
+	//Pilot
+	public void informPlaneReadyForBoarding() {
 		DepAirportLock.lock();
-		System.out.println("prepareForPassBoarding");
+		System.out.println("Pilot: informPlaneReadyForBoarding");
+		totalLeft = totalLeft - nInPlane;
+		nInPlane = 0;
+		readyForBoarding.signal();
+		DepAirportLock.unlock();
+	}
+	public void waitForAllInBoard() {
+		DepAirportLock.lock();
+		System.out.println("Pilot: waitForAllInBoard");
 		try {
-			planeReady.await();
+			readyToFly.await();
 		} catch (InterruptedException e) {
 		}
-		DepAirportLock.unlock();
+		finally{
+			DepAirportLock.unlock();
+		}
+	}
+	
+	//Hostess
+	public void waitForNextFlight() {
+		DepAirportLock.lock();
+		System.out.println("Hostess: waitForNextFlight");
+		try {
+			readyForBoarding.await();
+		} catch (InterruptedException e) {
+		} 
+		finally{
+			DepAirportLock.unlock();
+		}
+	}
+	
+	public void prepareForPassBoarding() {
+		DepAirportLock.lock();
+		System.out.println("Hostess: prepareForPassBoarding");
+		try {
+			inqueue.await();
+		} catch (InterruptedException e) {
+		} 
+		finally {
+			DepAirportLock.unlock();
+		}
 	}
 	
 	public void checkDocuments() {
 		DepAirportLock.lock();
-		System.out.println("checkDocuments");
+		System.out.println("Hostess: checkDocuments");
 		try {
+			showDocuments.signal();
 			documents.await();
-		} catch (InterruptedException e) {
 		}
-		DepAirportLock.unlock();
+		catch (InterruptedException e) {
+		} 
+		finally {
+			nInPlane++;
+			DepAirportLock.unlock();
+		}
 	}
 	
 	public boolean waitForNextPassenger() {
 		DepAirportLock.lock();
-		System.out.println("waitForNextPassenger");
-		if(queue.size() == 0) {
+		System.out.println("Hostess: waitForNextPassenger");
+		if((queue.size() == 0 && nInPlane>=MIN && nInPlane<=MAX) || totalLeft == 0 ) {
 			DepAirportLock.unlock();
 			return false;
 		}
@@ -59,36 +108,45 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 	
 	public void informPlaneReadyToTakeOff() {
 		DepAirportLock.lock();
-		System.out.println("informPlaneReadyToTakeOff");
+		System.out.println("Hostess: informPlaneReadyToTakeOff");
+		readyToFly.signal();
 		DepAirportLock.unlock();
 	}
 	
-	public void waitForNextFlight() {
-		DepAirportLock.lock();
-		System.out.println("waitForNextFlight");
-		DepAirportLock.unlock();
-	}
 	//Passenger
-	public void travelToAirport(int id) {
+	public void travelToAirport() {
 		DepAirportLock.lock();
-		System.out.println("travelToAirport");
+		System.out.println("Passenger: travelToAirport");
 		try {
 			TimeUnit.SECONDS.sleep((long) Math.random());
-			queue.put(id);
 		} catch (InterruptedException e) {
-		}
+		} 
 		finally {
 			DepAirportLock.unlock();
 		}
 	}
-	public void waitInQueue() {
-		System.out.println("waitInQueue");
+	public void waitInQueue(int id) {
+		DepAirportLock.lock();
+		System.out.println("Passenger: waitInQueue");
+		try {
+			queue.put(id);
+			inqueue.signal();
+		} catch (InterruptedException e) {
+		} 
+		finally {
+			DepAirportLock.unlock();
+		}
 	}
 	public void showDocuments() {
-		System.out.println("showDocuments");
-		documents.signal();
-	}
-	public void boardThePlane() {
-		System.out.println("boardThePlane");
+		DepAirportLock.lock();
+		System.out.println("Passenger: showDocuments");
+		try {
+			showDocuments.await();
+			documents.signal();
+		} catch (InterruptedException e) {
+		} 
+		finally {
+			DepAirportLock.unlock();
+		}
 	}
 }

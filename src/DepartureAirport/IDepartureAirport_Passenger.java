@@ -1,7 +1,7 @@
 package DepartureAirport;
 
 public interface IDepartureAirport_Passenger {
-	public void travelToAirport(int id);
-	public void waitInQueue();
+	public void travelToAirport();
+	public void waitInQueue(int id);
 	public void showDocuments();
 }

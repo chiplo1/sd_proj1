@@ -1,49 +1,74 @@
 package Plane;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 import Main.GeneralRepositoryInformation;
 
 public class SRPlane implements IPlane_Hostess,
 								IPlane_Passenger,
 								IPlane_Pilot {
-	private final int MIN;
-	private final int MAX;
-	private final GeneralRepositoryInformation airport;
 	
-	public SRPlane(GeneralRepositoryInformation airport, int minPassengers, int maxPassengers) {
+	private final GeneralRepositoryInformation airport;
+	private int inPlane;
+	
+	private final ReentrantLock PlaneLock = new ReentrantLock(true);
+	private final Condition arrived = PlaneLock.newCondition();
+	
+	public SRPlane(GeneralRepositoryInformation airport) {
         this.airport = airport;
-        this.MAX = maxPassengers;
-        this.MIN = minPassengers;
+        this.inPlane = 0;
     }
 	
 	//Pilot
-	public void informPlaneReadyForBoarding() {
-		System.out.println("informPlaneReadyForBoarding");
-	}
-	public void waitForAllInBoard() {
-		System.out.println("waitForAllInBoard");
-	}
 	public void flyToDestinationPoint() {
-		System.out.println("flyToDestinationPoint");
+		PlaneLock.lock();
+		System.out.println("Pilot: flyToDestinationPoint");
+		try {
+			TimeUnit.SECONDS.sleep((long) Math.random());
+		} catch (InterruptedException e) {
+		}finally {
+			PlaneLock.unlock();
+		}
 	}
 	public void announceArrival() {
-		System.out.println("announceArrival");
+		PlaneLock.lock();
+		System.out.println("Pilot: announceArrival");
+		arrived.signalAll();
+		PlaneLock.unlock();
 	}
 	public void flyToDeparturePoint() {
-		System.out.println("flyToDeparturePoint");
+		PlaneLock.lock();
+		System.out.println("Pilot: flyToDeparturePoint");
+		try {
+			TimeUnit.SECONDS.sleep((long) Math.random());
+		} catch (InterruptedException e) {
+		}finally {
+			PlaneLock.unlock();
+		}
 	}
 	public void parkAtTransferGate() {
-		System.out.println("parkAtTransferGate");
+		PlaneLock.lock();
+		System.out.println("Pilot: parkAtTransferGate");
+		inPlane = 0;
+		PlaneLock.unlock();
 	}
 
 	//Passenger
 	public void boardThePlane(int passengerID) {
-		System.out.println("boardThePlane");
+		PlaneLock.lock();
+		System.out.println("Passenger: boardThePlane");
+		inPlane++;
+		PlaneLock.unlock();
 	}
 	public void waitForEndOfFlight() {
-		System.out.println("waitForEndOfFlight");
+		PlaneLock.lock();
+		System.out.println("Passenger: waitForEndOfFlight");
+		try {
+			arrived.await();
+		} catch (InterruptedException e) {
+		}
+		PlaneLock.unlock();
 	}
-	public void leaveThePlane() {
-		System.out.println("leaveThePlane");
-	}
-
 }
