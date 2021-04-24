@@ -16,6 +16,8 @@ public class SRPlane implements IPlane_Hostess,
 	private final ReentrantLock PlaneLock = new ReentrantLock(true);
 	private final Condition arrived = PlaneLock.newCondition();
 	
+	private boolean arr;
+	
 	public SRPlane(GeneralRepositoryInformation airport) {
         this.airport = airport;
         this.inPlane = 0;
@@ -35,7 +37,9 @@ public class SRPlane implements IPlane_Hostess,
 	public void announceArrival() {
 		PlaneLock.lock();
 		System.out.println("Pilot: announceArrival");
+		arr=false;
 		arrived.signalAll();
+		arr=true;
 		PlaneLock.unlock();
 	}
 	public void flyToDeparturePoint() {
@@ -66,7 +70,8 @@ public class SRPlane implements IPlane_Hostess,
 		PlaneLock.lock();
 		System.out.println("Passenger: waitForEndOfFlight");
 		try {
-			arrived.await();
+			while(!arr)
+				arrived.await();
 		} catch (InterruptedException e) {
 		}
 		PlaneLock.unlock();

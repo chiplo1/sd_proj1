@@ -24,6 +24,7 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 	private final int MIN;
 	private final int MAX;
 	private int totalLeft;
+	private boolean rfb, rtf, doc, show, inq;
 	
 	public SRDepartureAirport(GeneralRepositoryInformation airport, int totalPassengers, int minPassengers, int maxPassengers) {
         this.airport = airport;
@@ -40,14 +41,17 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		System.out.println("Pilot: informPlaneReadyForBoarding");
 		totalLeft = totalLeft - nInPlane;
 		nInPlane = 0;
+		rfb=false;
 		readyForBoarding.signal();
+		rfb=true;
 		DepAirportLock.unlock();
 	}
 	public void waitForAllInBoard() {
 		DepAirportLock.lock();
 		System.out.println("Pilot: waitForAllInBoard");
 		try {
-			readyToFly.await();
+			while(!rtf)
+				readyToFly.await();
 		} catch (InterruptedException e) {
 		}
 		finally{
@@ -60,7 +64,8 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		DepAirportLock.lock();
 		System.out.println("Hostess: waitForNextFlight");
 		try {
-			readyForBoarding.await();
+			while(!rfb)
+				readyForBoarding.await();
 		} catch (InterruptedException e) {
 		} 
 		finally{
@@ -72,7 +77,8 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		DepAirportLock.lock();
 		System.out.println("Hostess: prepareForPassBoarding");
 		try {
-			inqueue.await();
+			while(!inq)
+				inqueue.await();
 		} catch (InterruptedException e) {
 		} 
 		finally {
@@ -84,12 +90,19 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		DepAirportLock.lock();
 		System.out.println("Hostess: checkDocuments");
 		try {
+			show=false;
 			showDocuments.signal();
-			documents.await();
+			show=true;
+			while(!doc)
+				documents.await();
 		}
 		catch (InterruptedException e) {
 		} 
 		finally {
+			try {
+				queue.take();
+			} catch (InterruptedException e) {
+			}
 			nInPlane++;
 			DepAirportLock.unlock();
 		}
@@ -98,6 +111,7 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 	public boolean waitForNextPassenger() {
 		DepAirportLock.lock();
 		System.out.println("Hostess: waitForNextPassenger");
+		System.out.println(queue.size()+" - "+nInPlane);
 		if((queue.size() == 0 && nInPlane>=MIN && nInPlane<=MAX) || totalLeft == 0 ) {
 			DepAirportLock.unlock();
 			return false;
@@ -109,7 +123,9 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 	public void informPlaneReadyToTakeOff() {
 		DepAirportLock.lock();
 		System.out.println("Hostess: informPlaneReadyToTakeOff");
+		rtf=false;
 		readyToFly.signal();
+		rtf=true;
 		DepAirportLock.unlock();
 	}
 	
@@ -130,7 +146,9 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		System.out.println("Passenger: waitInQueue");
 		try {
 			queue.put(id);
+			inq=false;
 			inqueue.signal();
+			inq=true;
 		} catch (InterruptedException e) {
 		} 
 		finally {
@@ -141,8 +159,11 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		DepAirportLock.lock();
 		System.out.println("Passenger: showDocuments");
 		try {
-			showDocuments.await();
+			while(!show)
+				showDocuments.await();
+			doc=false;
 			documents.signal();
+			doc=true;
 		} catch (InterruptedException e) {
 		} 
 		finally {
