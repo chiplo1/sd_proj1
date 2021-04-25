@@ -5,70 +5,67 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import Main.GeneralRepositoryInformation;
+import utils.BlockingQueue;
 
 public class SRPlane implements IPlane_Hostess,
 								IPlane_Passenger,
 								IPlane_Pilot {
 	
 	private final GeneralRepositoryInformation airport;
-	private int inPlane;
 	
 	private final ReentrantLock PlaneLock = new ReentrantLock(true);
 	private final Condition arrived = PlaneLock.newCondition();
 	
+	private final BlockingQueue<Integer> plane;
 	private boolean arr;
 	
-	public SRPlane(GeneralRepositoryInformation airport) {
+	public SRPlane(GeneralRepositoryInformation airport, BlockingQueue<Integer> plane) {
         this.airport = airport;
-        this.inPlane = 0;
+        this.plane = plane;
     }
 	
 	//Pilot
+	@Override
 	public void flyToDestinationPoint() {
 		PlaneLock.lock();
-		System.out.println("Pilot: flyToDestinationPoint");
 		try {
-			TimeUnit.SECONDS.sleep((long) Math.random());
+			TimeUnit.SECONDS.sleep((long) Math.random() * 2 + 1);
 		} catch (InterruptedException e) {
 		}finally {
 			PlaneLock.unlock();
 		}
 	}
+	
+	@Override
 	public void announceArrival() {
 		PlaneLock.lock();
-		System.out.println("Pilot: announceArrival");
 		arr=false;
 		arrived.signalAll();
 		arr=true;
 		PlaneLock.unlock();
 	}
-	public void flyToDeparturePoint() {
-		PlaneLock.lock();
-		System.out.println("Pilot: flyToDeparturePoint");
-		try {
-			TimeUnit.SECONDS.sleep((long) Math.random());
-		} catch (InterruptedException e) {
-		}finally {
-			PlaneLock.unlock();
-		}
-	}
+	
+	@Override
 	public void parkAtTransferGate() {
 		PlaneLock.lock();
-		System.out.println("Pilot: parkAtTransferGate");
-		inPlane = 0;
 		PlaneLock.unlock();
 	}
 
 	//Passenger
+	@Override
 	public void boardThePlane(int passengerID) {
 		PlaneLock.lock();
-		System.out.println("Passenger: boardThePlane");
-		inPlane++;
+		try {
+			plane.put(passengerID);
+			System.out.println("Passengers in the plane: "+plane.toString());
+		} catch (InterruptedException e) {
+		}
 		PlaneLock.unlock();
 	}
+	
+	@Override
 	public void waitForEndOfFlight() {
 		PlaneLock.lock();
-		System.out.println("Passenger: waitForEndOfFlight");
 		try {
 			while(!arr)
 				arrived.await();

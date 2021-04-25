@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
@@ -27,7 +28,7 @@ public class BlockingQueue<T> {
                 notFull.await();
             }
             queue.add(element);
-            notEmpty.signal();
+            notEmpty.signalAll();
         } finally {
             lock.unlock();
         }
@@ -40,7 +41,7 @@ public class BlockingQueue<T> {
                 notEmpty.await();
             }
             T item = queue.remove();
-            notFull.signal();
+            notFull.signalAll();
             return item;
         } finally {
             lock.unlock();
@@ -48,6 +49,14 @@ public class BlockingQueue<T> {
     }
     
     public Integer size() {
-    	return queue.size();
+        lock.lock();
+    	int size = queue.size();
+        lock.unlock();
+        return size;
+    }
+    
+    @Override
+    public String toString() {
+    	return Arrays.toString(queue.toArray());
     }
 }

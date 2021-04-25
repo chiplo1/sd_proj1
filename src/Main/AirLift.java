@@ -8,6 +8,7 @@ import DestinationAirport.SRDestinationAirport;
 import Plane.SRPlane;
 
 import genclass.*;
+import utils.BlockingQueue;
 
 public class AirLift {
 
@@ -21,12 +22,14 @@ public class AirLift {
 		
 		GeneralRepositoryInformation airport = new GeneralRepositoryInformation();
 		
-		SRDepartureAirport departureAirport = new SRDepartureAirport(airport, TOTAL_PASSENGERS, MIN_PASSENGERS, MAX_PASSENGERS);
-		SRDestinationAirport destinationAirport = new SRDestinationAirport(airport,TOTAL_PASSENGERS);
-		SRPlane plane = new SRPlane(airport);
+		BlockingQueue<Integer> plane = new BlockingQueue<>(TOTAL_PASSENGERS);
+		
+		SRDepartureAirport departureAirportSR = new SRDepartureAirport(airport, plane, TOTAL_PASSENGERS, MIN_PASSENGERS, MAX_PASSENGERS);
+		SRDestinationAirport destinationAirportSR = new SRDestinationAirport(airport, plane, TOTAL_PASSENGERS);
+		SRPlane planeSR = new SRPlane(airport, plane);
 		 
-		AEPilot aePilot = new AEPilot(0,departureAirport,destinationAirport,plane);
-		AEHostess aeHostess = new AEHostess(0,departureAirport,destinationAirport,plane);
+		AEPilot aePilot = new AEPilot(0,departureAirportSR,destinationAirportSR,planeSR);
+		AEHostess aeHostess = new AEHostess(0,departureAirportSR,destinationAirportSR,planeSR);
 		AEPassenger[] aePassenger = new AEPassenger[TOTAL_PASSENGERS];
 		 
 		// start active entities: Threads
@@ -34,7 +37,7 @@ public class AirLift {
 		aeHostess.start();
 		 		 
 		for (Integer i = 0; i < TOTAL_PASSENGERS;i++) {
-			aePassenger[i] = new AEPassenger(i,departureAirport,destinationAirport,plane);
+			aePassenger[i] = new AEPassenger(i,departureAirportSR,destinationAirportSR,planeSR);
 			aePassenger[i].start();
 		}
 		

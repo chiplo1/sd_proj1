@@ -43,37 +43,38 @@ public class AEHostess extends Thread {
      */
 	@Override
 	public void run() {
-        System.out.println("Hostess: Hello!");
+        //System.out.println("Hostess: Hello!");
         boolean morePassengers=true;
     	while(morePassengers){
-            switch(this.state){
+    		System.out.println("Hostess: "+getCurret_state());
+            switch(getCurret_state()){
                 case WAIT_FOR_NEXT_FLIGHT://blocking state (initial / final state)
                 	//The hostess is waken up by the operation informPlaneReadyForBoarding of the pilot after
                 	//parking the plane at the departure gate.
                 	depAirport.waitForNextFlight();
-                	depAirport.prepareForPassBoarding();
-                    this.state = HostessState.WAIT_FOR_PASSENGER;
+                	setCurret_state(HostessState.WAIT_FOR_PASSENGER);
                     break;
                 case WAIT_FOR_PASSENGER://blocking state
                 	//The hostess is waken up by the operation waitInQueue of the passenger while he / she waits
                 	//to have his / her documents checked.
+                	depAirport.prepareForPassBoarding();
                 	depAirport.checkDocuments();
-                	this.state = HostessState.CHECK_PASSENGER;
+                	setCurret_state(HostessState.CHECK_PASSENGER);
                     break;
                 case CHECK_PASSENGER://blocking state
                 	//The hostess is waken up by the operation showDocuments of the passenger when he / she
                 	//hands his / her plane ticket to be checked.
                 	boolean waitMore = depAirport.waitForNextPassenger();
                 	if(waitMore) {
-                		this.state = HostessState.WAIT_FOR_PASSENGER;
+                		setCurret_state(HostessState.WAIT_FOR_PASSENGER);
                 	}
                 	else {
-                		this.state = HostessState.READY_TO_FLY;
+                		setCurret_state(HostessState.READY_TO_FLY);
                 	}
                     break;
                 case READY_TO_FLY:
             		depAirport.informPlaneReadyToTakeOff();
-                	this.state = HostessState.WAIT_FOR_NEXT_FLIGHT;
+            		setCurret_state(HostessState.WAIT_FOR_NEXT_FLIGHT);
                 	morePassengers = destAirport.morePassengers();
                     break;
             }

@@ -43,33 +43,34 @@ public class AEPilot extends Thread {
      */
 	@Override
 	public void run() {
-        System.out.println("Pilot: Hello!");
+        //System.out.println("Pilot: Hello!");
         boolean morePassengers=true;
     	while(morePassengers){
-            switch(this.state){
+    		System.out.println("Pilot: "+getCurret_state());
+            switch(getCurret_state()){
                 case AT_TRANSFER_GATE:
                 	depAirport.informPlaneReadyForBoarding();
-                    this.state = PilotState.READY_FOR_BOARDING;
+                	setCurret_state(PilotState.READY_FOR_BOARDING);
                     break;
                 case READY_FOR_BOARDING:
                 	depAirport.waitForAllInBoard();
-                	this.state = PilotState.WAIT_FOR_BOARDING;
+                	setCurret_state(PilotState.WAIT_FOR_BOARDING);
                     break;
                 case WAIT_FOR_BOARDING://blocking state - The pilot is waken up by the operation informPlaneReadyToTakeOff of the hostess when boarding is complete.
                 	plane.flyToDestinationPoint();
-                	this.state = PilotState.FLYING_FORWARD;
+                	setCurret_state(PilotState.FLYING_FORWARD);
                     break;
                 case FLYING_FORWARD://independent state with blocking - The pilot should be made to sleep for a random time interval in the simulation.
                 	plane.announceArrival();
-                	this.state = PilotState.DEBOARDING;
+                	setCurret_state(PilotState.DEBOARDING);
                     break;
                 case DEBOARDING://blocking state - The pilot is waken up by the operation leaveThePlane of the last passenger to leave the plane.
-                	plane.flyToDeparturePoint();
-                	this.state = PilotState.FLYING_BACK;
+                	destAirport.flyToDeparturePoint();
+                	setCurret_state(PilotState.FLYING_BACK);
                     break;
                 case FLYING_BACK:// independent state with blocking - The pilot should be made to sleep for a random time interval in the simulation.
                 	plane.parkAtTransferGate();
-                    this.state = PilotState.AT_TRANSFER_GATE;
+                	setCurret_state(PilotState.AT_TRANSFER_GATE);
                 	morePassengers = destAirport.morePassengers();
                     break;
             }

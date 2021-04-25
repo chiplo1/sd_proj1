@@ -1,5 +1,6 @@
 package DepartureAirport;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -17,28 +18,31 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
     private final Condition documents = DepAirportLock.newCondition();
     private final Condition showDocuments = DepAirportLock.newCondition();
     private final Condition inqueue = DepAirportLock.newCondition();
+    private final Condition boarding = DepAirportLock.newCondition();
     
     private final GeneralRepositoryInformation airport;
 	private final BlockingQueue<Integer> queue;
+	private final BlockingQueue<Integer> plane;
     private int nInPlane;
 	private final int MIN;
 	private final int MAX;
 	private int totalLeft;
-	private boolean rfb, rtf, doc, show, inq;
+	private boolean rfb , rtf, doc, show, inq, board = false;
 	
-	public SRDepartureAirport(GeneralRepositoryInformation airport, int totalPassengers, int minPassengers, int maxPassengers) {
+	public SRDepartureAirport(GeneralRepositoryInformation airport, BlockingQueue<Integer> plane, int totalPassengers, int minPassengers, int maxPassengers) {
         this.airport = airport;
         this.queue= new BlockingQueue<>(totalPassengers);
         this.nInPlane = 0;
         this.MAX = maxPassengers;
         this.MIN = minPassengers;
         this.totalLeft = totalPassengers;
+        this.plane = plane;
     }
 	
 	//Pilot
+	@Override
 	public void informPlaneReadyForBoarding() {
 		DepAirportLock.lock();
-		System.out.println("Pilot: informPlaneReadyForBoarding");
 		totalLeft = totalLeft - nInPlane;
 		nInPlane = 0;
 		rfb=false;
@@ -46,9 +50,10 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		rfb=true;
 		DepAirportLock.unlock();
 	}
+	
+	@Override
 	public void waitForAllInBoard() {
 		DepAirportLock.lock();
-		System.out.println("Pilot: waitForAllInBoard");
 		try {
 			while(!rtf)
 				readyToFly.await();
@@ -60,9 +65,9 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 	}
 	
 	//Hostess
+	@Override
 	public void waitForNextFlight() {
 		DepAirportLock.lock();
-		System.out.println("Hostess: waitForNextFlight");
 		try {
 			while(!rfb)
 				readyForBoarding.await();
@@ -73,9 +78,9 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		}
 	}
 	
+	@Override
 	public void prepareForPassBoarding() {
 		DepAirportLock.lock();
-		System.out.println("Hostess: prepareForPassBoarding");
 		try {
 			while(!inq)
 				inqueue.await();
@@ -86,9 +91,9 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 		}
 	}
 	
+	@Override
 	public void checkDocuments() {
 		DepAirportLock.lock();
-		System.out.println("Hostess: checkDocuments");
 		try {
 			show=false;
 			showDocuments.signal();
@@ -103,70 +108,74 @@ public class SRDepartureAirport implements 	IDepartureAirport_Hostess,
 				queue.take();
 			} catch (InterruptedException e) {
 			}
-			nInPlane++;
 			DepAirportLock.unlock();
 		}
 	}
 	
+	@Override
 	public boolean waitForNextPassenger() {
 		DepAirportLock.lock();
-		System.out.println("Hostess: waitForNextPassenger");
-		System.out.println(queue.size()+" - "+nInPlane);
-		if((queue.size() == 0 && nInPlane>=MIN && nInPlane<=MAX) || totalLeft == 0 ) {
+		//System.out.println(queue.size()+" - "+nInPlane);
+		if(nInPlane==MAX || (queue.size() == 0 && nInPlane>=MIN && nInPlane<=MAX) || totalLeft == 0 ) {
 			DepAirportLock.unlock();
 			return false;
 		}
+		board=false;
+		boarding.signal();
+		board=true;
 		DepAirportLock.unlock();
 		return true;
 	}
 	
+	@Override
 	public void informPlaneReadyToTakeOff() {
 		DepAirportLock.lock();
-		System.out.println("Hostess: informPlaneReadyToTakeOff");
 		rtf=false;
 		readyToFly.signal();
 		rtf=true;
+		rfb=false;
 		DepAirportLock.unlock();
 	}
 	
 	//Passenger
+	@Override
 	public void travelToAirport() {
-		DepAirportLock.lock();
-		System.out.println("Passenger: travelToAirport");
 		try {
-			TimeUnit.SECONDS.sleep((long) Math.random());
+			TimeUnit.SECONDS.sleep((long) (Math.random() * 3)); // Sleep 0 to 3 seconds
 		} catch (InterruptedException e) {
 		} 
-		finally {
-			DepAirportLock.unlock();
-		}
 	}
+	
+	@Override
 	public void waitInQueue(int id) {
 		DepAirportLock.lock();
-		System.out.println("Passenger: waitInQueue");
 		try {
 			queue.put(id);
 			inq=false;
 			inqueue.signal();
 			inq=true;
+			while(!show)
+				showDocuments.await();
 		} catch (InterruptedException e) {
 		} 
 		finally {
 			DepAirportLock.unlock();
 		}
 	}
+	
+	@Override
 	public void showDocuments() {
 		DepAirportLock.lock();
-		System.out.println("Passenger: showDocuments");
 		try {
-			while(!show)
-				showDocuments.await();
 			doc=false;
 			documents.signal();
 			doc=true;
+			while(!board)
+				boarding.await();
 		} catch (InterruptedException e) {
 		} 
 		finally {
+			nInPlane++;
 			DepAirportLock.unlock();
 		}
 	}
